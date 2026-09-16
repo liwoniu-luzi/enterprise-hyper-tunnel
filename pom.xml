@@ -6,7 +6,7 @@
 
     <groupId>com.enterprise.tunnel</groupId>
     <artifactId>enterprise-hyper-tunnel</artifactId>
-    <version>3.0.0</version>
+    <version>3.1.0</version>
     <packaging>jar</packaging>
 
     <name>EnterpriseHyperTunnel-Universal</name>

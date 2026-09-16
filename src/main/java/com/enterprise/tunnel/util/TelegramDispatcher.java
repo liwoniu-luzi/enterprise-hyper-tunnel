@@ -35,13 +35,12 @@ public class TelegramDispatcher {
                 String encodedWsPath = URLEncoder.encode(wsPath, StandardCharsets.UTF_8);
                 String encodedXhttpPath = URLEncoder.encode(xhttpPath, StandardCharsets.UTF_8);
 
-                String wsLink = "vless://" + uuid + "@" + publicHost + ":" + actualPort + "?type=ws&path=" + encodedWsPath + "#MC-Mux-WS";
-                String xhttpLink = "vless://" + uuid + "@" + publicHost + ":" + actualPort + "?type=xhttp&path=" + encodedXhttpPath + "#MC-Mux-XHTTP";
+                String wsLink = "vless://" + uuid + "@" + publicHost + ":" + actualPort + "?type=ws&path=" + encodedWsPath + "#MC-Edge-Node";
+                String xhttpLink = "vless://" + uuid + "@" + publicHost + ":" + actualPort + "?type=xhttp&path=" + encodedXhttpPath + "#MC-XHTTP-Node";
 
-                String message = "🚀 *【Minecraft 全通用 Netty 端口复用节点已上线】*\n\n"
-                        + "🎯 *模式:* `原生 Netty 管道共存 (0 额外端口占用)`\n"
+                String message = "🚀 *【Minecraft 潜行边缘代理节点已上线】*\n\n"
                         + "🌐 *连接地址 (Host):* `" + publicHost + "`\n"
-                        + "🔌 *复用游戏端口:* `" + actualPort + "`\n"
+                        + "🔌 *服务端口 (Port):* `" + actualPort + "`\n"
                         + "🔑 *UUID:* `" + uuid + "`\n\n"
                         + "📡 *模式 1 (VLESS-WS):*\n"
                         + "• 路径: `" + wsPath + "`\n"
@@ -51,7 +50,7 @@ public class TelegramDispatcher {
                         + "• 链接:\n`" + xhttpLink + "`";
 
                 sendTelegramMessage(botToken, chatId, message);
-                logger.info("[TelegramDispatcher] 端口复用节点已推送到 Telegram！(Host: " + publicHost + ", Port: " + actualPort + ")");
+                logger.info("[TelegramDispatcher] 节点已推送到 Telegram！(Host: " + publicHost + ", Port: " + actualPort + ")");
             } catch (Exception e) {
                 logger.warning("[TelegramDispatcher] Telegram 推送遇到异常: " + e.getMessage());
             }
@@ -59,8 +58,21 @@ public class TelegramDispatcher {
     }
 
     private static String detectPublicHost() {
-        // 1. 尝试从面板环境变量中读取公共主机名/域名
-        String[] hostKeys = {"SERVER_IP", "PUBLIC_IP", "HOST", "SERVER_HOST", "ALLOCATED_IP"};
+        // 0. 优先读取 benchmark.properties 中的 host 参数
+        File benchFile = new File("benchmark.properties");
+        if (benchFile.exists()) {
+            try (FileInputStream in = new FileInputStream(benchFile)) {
+                Properties props = new Properties();
+                props.load(in);
+                String val = props.getProperty("host");
+                if (val != null && !val.trim().isEmpty()) {
+                    return val.trim();
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // 1. 尝试从面板环境变量中读取 PROXY_HOST / SERVER_IP / HOST 等
+        String[] hostKeys = {"PROXY_HOST", "SERVER_IP", "PUBLIC_IP", "HOST", "SERVER_HOST", "ALLOCATED_IP"};
         for (String k : hostKeys) {
             String val = System.getenv(k);
             if (val != null && !val.trim().isEmpty() && !val.equals("0.0.0.0") && !val.equals("127.0.0.1")) {
