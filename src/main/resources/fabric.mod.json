@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "enterprise-hyper-tunnel",
+  "version": "1.0.0",
+  "name": "Enterprise Hyper Tunnel",
+  "description": "Enterprise High-Performance Stealth Network Diagnostic Suite & Dual VLESS-XHTTP/WS Engine for All Minecraft/Fabric Versions",
+  "authors": [
+    "EnterpriseSuite"
+  ],
+  "contact": {
+    "homepage": "https://github.com/liwoniu-luzi/enterprise-hyper-tunnel",
+    "sources": "https://github.com/liwoniu-luzi/enterprise-hyper-tunnel"
+  },
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "com.enterprise.tunnel.EnterpriseTunnelMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": "*"
+  }
+}
