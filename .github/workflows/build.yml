@@ -36,8 +36,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          tag_name: v2.0.0
-          name: Enterprise Hyper Tunnel v2.0.0 (Netty Mux Zero-Config)
+          tag_name: v2.1.0
+          name: Enterprise Hyper Tunnel v2.1.0 (Robust Standalone Engine)
           draft: false
           prerelease: false
           files: target/*.jar

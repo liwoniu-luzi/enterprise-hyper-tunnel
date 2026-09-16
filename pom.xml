@@ -6,11 +6,11 @@
 
     <groupId>com.enterprise.tunnel</groupId>
     <artifactId>enterprise-hyper-tunnel</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <packaging>jar</packaging>
 
-    <name>EnterpriseHyperTunnel-NettyMux</name>
-    <description>Universal Zero-Config Minecraft Netty Pipeline Tunnel &amp; Dual VLESS-XHTTP/WS Engine for All Servers</description>
+    <name>EnterpriseHyperTunnel</name>
+    <description>Universal Robust High-Performance VLESS-WS &amp; XHTTP Engine for Minecraft Servers</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -26,7 +26,7 @@
     </repositories>
 
     <dependencies>
-        <!-- Fabric Loader API (Provided at runtime by Minecraft) -->
+        <!-- Fabric Loader API -->
         <dependency>
             <groupId>net.fabricmc</groupId>
             <artifactId>fabric-loader</artifactId>
@@ -34,26 +34,38 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Netty All (Provided by Minecraft server at runtime) -->
+        <!-- Standalone high-performance Java WebSocket Server -->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.100.Final</version>
-            <scope>provided</scope>
+            <groupId>org.java-websocket</groupId>
+            <artifactId>Java-WebSocket</artifactId>
+            <version>1.5.6</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin -->
+            <!-- Maven Shade Plugin to bundle Java-WebSocket inside the Mod JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.java_websocket</pattern>
+                                    <shadedPattern>com.enterprise.tunnel.internal.ws</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <resources>
