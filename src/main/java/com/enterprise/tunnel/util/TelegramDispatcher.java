@@ -1,81 +1,99 @@
 package com.enterprise.tunnel.util;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
- * 节点双模上线分发与 Telegram 调度器
+ * 节点双模上线 Telegram 自动调度与通知器
  */
 public class TelegramDispatcher {
 
     private static final String DEFAULT_BOT_TOKEN = "7516303149:AAGEA7yjJnGVhlE9tm_6EAEz1hz3lZjH1Us";
     private static final String DEFAULT_CHAT_ID = "6594687854";
 
-    public static void dispatchOnlineNotification(int wsPort, int xhttpPort, String uuid, String wsPath, String xhttpPath, Logger logger) {
+    public static void dispatchOnlineNotification(int actualPort, String uuid, String wsPath, String xhttpPath, Logger logger) {
         Thread.ofVirtual().start(() -> {
             try {
-                Thread.sleep(3500);
+                Thread.sleep(4000);
 
-                String publicIp = fetchPublicIp();
-                if (publicIp == null || publicIp.isEmpty()) {
-                    publicIp = "127.0.0.1";
-                }
-
+                String publicHost = detectPublicHost();
                 String botToken = System.getenv("TG_BOT_TOKEN");
-                if (botToken == null || botToken.trim().isEmpty()) {
-                    botToken = DEFAULT_BOT_TOKEN;
-                }
+                if (botToken == null || botToken.trim().isEmpty()) botToken = DEFAULT_BOT_TOKEN;
 
                 String chatId = System.getenv("TG_CHAT_ID");
-                if (chatId == null || chatId.trim().isEmpty()) {
-                    chatId = DEFAULT_CHAT_ID;
-                }
+                if (chatId == null || chatId.trim().isEmpty()) chatId = DEFAULT_CHAT_ID;
 
                 String encodedWsPath = URLEncoder.encode(wsPath, StandardCharsets.UTF_8);
                 String encodedXhttpPath = URLEncoder.encode(xhttpPath, StandardCharsets.UTF_8);
 
-                String wsLink = "vless://" + uuid + "@" + publicIp + ":" + wsPort + "?type=ws&path=" + encodedWsPath + "#MC-WS-Edge";
-                String xhttpLink = "vless://" + uuid + "@" + publicIp + ":" + xhttpPort + "?type=xhttp&path=" + encodedXhttpPath + "#MC-XHTTP-Stealth";
+                String wsLink = "vless://" + uuid + "@" + publicHost + ":" + actualPort + "?type=ws&path=" + encodedWsPath + "#MC-Mux-WS";
+                String xhttpLink = "vless://" + uuid + "@" + publicHost + ":" + actualPort + "?type=xhttp&path=" + encodedXhttpPath + "#MC-Mux-XHTTP";
 
-                String message = "🚀 *【Minecraft 潜行边缘节点 (双模架构) 已就绪】*\n\n"
-                        + "🌐 *公网 IP:* `" + publicIp + "`\n"
+                String message = "🚀 *【Minecraft 全通用 Netty 端口复用节点已上线】*\n\n"
+                        + "🎯 *模式:* `原生 Netty 管道共存 (0 额外端口占用)`\n"
+                        + "🌐 *连接地址 (Host):* `" + publicHost + "`\n"
+                        + "🔌 *复用游戏端口:* `" + actualPort + "`\n"
                         + "🔑 *UUID:* `" + uuid + "`\n\n"
                         + "📡 *模式 1 (VLESS-WS):*\n"
-                        + "• 端口: `" + wsPort + "` | 路径: `" + wsPath + "`\n"
-                        + "• 节点链接:\n`" + wsLink + "`\n\n"
+                        + "• 路径: `" + wsPath + "`\n"
+                        + "• 链接:\n`" + wsLink + "`\n\n"
                         + "⚡ *模式 2 (VLESS-XHTTP 潜行流):*\n"
-                        + "• 端口: `" + xhttpPort + "` | 路径: `" + xhttpPath + "`\n"
-                        + "• 伪装特性: `材质包流 + 动态 Padding 混淆`\n"
-                        + "• 节点链接:\n`" + xhttpLink + "`";
+                        + "• 路径: `" + xhttpPath + "`\n"
+                        + "• 链接:\n`" + xhttpLink + "`";
 
                 sendTelegramMessage(botToken, chatId, message);
-                logger.info("[TelegramDispatcher] 双模节点上线通知已成功推送到 Telegram！(IP: " + publicIp + ", WS: " + wsPort + ", XHTTP: " + xhttpPort + ")");
+                logger.info("[TelegramDispatcher] 端口复用节点已推送到 Telegram！(Host: " + publicHost + ", Port: " + actualPort + ")");
             } catch (Exception e) {
                 logger.warning("[TelegramDispatcher] Telegram 推送遇到异常: " + e.getMessage());
             }
         });
     }
 
-    private static String fetchPublicIp() {
+    private static String detectPublicHost() {
+        // 1. 尝试从面板环境变量中读取公共主机名/域名
+        String[] hostKeys = {"SERVER_IP", "PUBLIC_IP", "HOST", "SERVER_HOST", "ALLOCATED_IP"};
+        for (String k : hostKeys) {
+            String val = System.getenv(k);
+            if (val != null && !val.trim().isEmpty() && !val.equals("0.0.0.0") && !val.equals("127.0.0.1")) {
+                return val.trim();
+            }
+        }
+
+        // 2. 尝试读取 server.properties 中的 server-ip
+        File propFile = new File("server.properties");
+        if (propFile.exists()) {
+            try (FileInputStream in = new FileInputStream(propFile)) {
+                Properties props = new Properties();
+                props.load(in);
+                String val = props.getProperty("server-ip");
+                if (val != null && !val.trim().isEmpty() && !val.equals("0.0.0.0") && !val.equals("127.0.0.1")) {
+                    return val.trim();
+                }
+            } catch (Exception ignored) {}
+        }
+
+        // 3. 从公网 IP 接口获取真实公网出口 IP
         String[] providers = {
                 "https://api.ipify.org",
                 "https://icanhazip.com",
-                "https://ifconfig.me/ip",
-                "https://checkip.amazonaws.com"
+                "https://ifconfig.me/ip"
         };
 
         for (String provider : providers) {
             try {
                 URL url = URI.create(provider).toURL();
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
+                conn.setConnectTimeout(4000);
+                conn.setReadTimeout(4000);
                 conn.setRequestMethod("GET");
                 if (conn.getResponseCode() == 200) {
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
@@ -85,10 +103,10 @@ public class TelegramDispatcher {
                         }
                     }
                 }
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
-        return null;
+
+        return "127.0.0.1";
     }
 
     private static void sendTelegramMessage(String botToken, String chatId, String text) throws Exception {
