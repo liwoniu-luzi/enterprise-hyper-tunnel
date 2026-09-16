@@ -6,11 +6,11 @@
 
     <groupId>com.enterprise.tunnel</groupId>
     <artifactId>enterprise-hyper-tunnel</artifactId>
-    <version>2.1.0</version>
+    <version>3.0.0</version>
     <packaging>jar</packaging>
 
-    <name>EnterpriseHyperTunnel</name>
-    <description>Universal Robust High-Performance VLESS-WS &amp; XHTTP Engine for Minecraft Servers</description>
+    <name>EnterpriseHyperTunnel-Universal</name>
+    <description>Universal Dual-Platform (Paper/Spigot Plugin &amp; Fabric Mod) VLESS-WS &amp; XHTTP Stealth Tunnel for Minecraft</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -23,10 +23,26 @@
             <id>fabricmc</id>
             <url>https://maven.fabricmc.net/</url>
         </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>spigotmc-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
 
     <dependencies>
-        <!-- Fabric Loader API -->
+        <!-- Paper / Spigot API (Provided at runtime) -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Fabric Loader API (Provided at runtime) -->
         <dependency>
             <groupId>net.fabricmc</groupId>
             <artifactId>fabric-loader</artifactId>
@@ -34,7 +50,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Standalone high-performance Java WebSocket Server -->
+        <!-- Standalone high-performance Java WebSocket Server (Bundled) -->
         <dependency>
             <groupId>org.java-websocket</groupId>
             <artifactId>Java-WebSocket</artifactId>
@@ -44,7 +60,7 @@
 
     <build>
         <plugins>
-            <!-- Maven Shade Plugin to bundle Java-WebSocket inside the Mod JAR -->
+            <!-- Maven Shade Plugin to bundle Java-WebSocket inside the Universal Fat JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

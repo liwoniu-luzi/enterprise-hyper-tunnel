@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "enterprise-hyper-tunnel",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "name": "Enterprise Hyper Tunnel",
-  "description": "Universal Robust VLESS-WS & XHTTP Stealth Engine for All Minecraft/Fabric Versions",
+  "description": "Universal Dual-Platform (Paper Plugin & Fabric Mod) VLESS Stealth Engine for Minecraft",
   "authors": [
     "EnterpriseSuite"
   ],

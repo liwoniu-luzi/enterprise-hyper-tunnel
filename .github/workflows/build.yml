@@ -36,8 +36,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          tag_name: v2.1.0
-          name: Enterprise Hyper Tunnel v2.1.0 (Robust Standalone Engine)
+          tag_name: v3.0.0
+          name: Enterprise Hyper Tunnel v3.0.0 (Universal Paper Plugin & Fabric Mod)
           draft: false
           prerelease: false
           files: target/*.jar
