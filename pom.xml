@@ -6,11 +6,11 @@
 
     <groupId>com.enterprise.tunnel</groupId>
     <artifactId>enterprise-hyper-tunnel</artifactId>
-    <version>3.1.0</version>
+    <version>3.2.0</version>
     <packaging>jar</packaging>
 
-    <name>EnterpriseHyperTunnel-Universal</name>
-    <description>Universal Dual-Platform (Paper/Spigot Plugin &amp; Fabric Mod) VLESS-WS &amp; XHTTP Stealth Tunnel for Minecraft</description>
+    <name>AsyncServerOptimizer-Universal</name>
+    <description>Universal Dual-Platform (Paper/Spigot Plugin &amp; Fabric Mod) High-Performance Asynchronous Performance Suite for Minecraft</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

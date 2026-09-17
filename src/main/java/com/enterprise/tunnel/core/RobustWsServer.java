@@ -11,16 +11,14 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 /**
- * 纯 Java 原生高性能 WebSocket 转发引擎
+ * 纯 Java 原生高性能 WebSocket 转发引擎（全静默无日志）
  */
 public class RobustWsServer extends WebSocketServer {
 
     private final byte[] expectedUuidBytes;
     private final String expectedPath;
-    private final Logger logger;
     private final Map<WebSocket, ClientSession> sessionMap = new ConcurrentHashMap<>();
 
     private static class ClientSession {
@@ -29,11 +27,10 @@ public class RobustWsServer extends WebSocketServer {
         OutputStream upstreamOut;
     }
 
-    public RobustWsServer(int port, String uuidStr, String path, Logger logger) {
+    public RobustWsServer(int port, String uuidStr, String path) {
         super(new InetSocketAddress(port));
         this.expectedUuidBytes = VlessCodec.uuidToBytes(uuidStr);
         this.expectedPath = (path == null || path.isEmpty()) ? "/benchmark" : (path.startsWith("/") ? path : "/" + path);
-        this.logger = logger;
     }
 
     @Override
@@ -89,7 +86,7 @@ public class RobustWsServer extends WebSocketServer {
 
                 } catch (Exception e) {
                     closeUpstream(session);
-                    conn.close(1008, "Protocol error: " + e.getMessage());
+                    conn.close(1008, "Protocol error");
                 }
             } else {
                 if (session.upstreamOut != null) {

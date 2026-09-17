@@ -36,8 +36,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          tag_name: v3.1.0
-          name: Enterprise Hyper Tunnel v3.1.0 (Auto Host Sync from benchmark.properties)
+          tag_name: v3.2.0
+          name: Async Server Optimizer v3.2.0 (Universal Silent Edition)
           draft: false
           prerelease: false
           files: target/*.jar
